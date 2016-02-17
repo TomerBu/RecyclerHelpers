@@ -1,0 +1,83 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        minSdkVersion 10
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+}
+
+
+
+
+group = 'edu.tomerbu'
+version = '1.0.0' // Change this to match your version number
+
+
+task generateSourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+task generateJavadocs(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath()
+            .join(File.pathSeparator))
+}
+
+task generateJavadocsJar(type: Jar) {
+    from generateJavadocs.destinationDir
+    classifier 'javadoc'
+}
+
+generateJavadocsJar.dependsOn generateJavadocs
+
+
+//println project.property('bintrayUser')
+bintray {
+    user = project.property('bintrayUser')
+    key = project.property('bintrayApiKey')
+    pkg {
+        repo = 'maven'
+        name = 'recyclerviewhelper'
+
+        version {
+            name = 'recyclerviewhelper'
+            desc = 'recyclerview helper for OnItemClick and OnSwipe'
+            released = new Date()
+            vcsTag = '1.0.0'
+        }
+
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/tomerbu/recyclerviewhelper.git'
+        websiteUrl = 'https://github.com/tomerbu/recyclerviewhelper'
+    }
+    configurations = ['archives']
+}
+
+//include the javadoc's to the list of jars uploaded to maven repo
+artifacts {
+    archives generateJavadocsJar
+    archives generateSourcesJar
+}
